@@ -8,7 +8,6 @@ import(
 	"math/rand"
 	
 	"github.com/gorilla/context"
-	/"github.com/mediocregopher/radix.v2"
 )
 
 //Init global variables
