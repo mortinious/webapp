@@ -36,9 +36,14 @@ func main(){
 	//Sets port number and runs init()
 	port := 7001
 	initVars()
+	initRadix()
 
-	
+	//Creates new seed based on prevoius seed
 	rand.Seed(rand.Int63())
+	
+	//Test redis connection
+	connect("192.168.42.50",6379)
+	
 	
 	//Registers handlers for GET and POST requests
 	http.HandleFunc("/favicon.ico", handleIcon)
