@@ -42,7 +42,7 @@ func main(){
 	rand.Seed(rand.Int63())
 	
 	//Test redis connection
-	connect("192.168.42.50",6379)
+	connect("mortinet.se",6379)
 	
 	
 	//Registers handlers for GET and POST requests
