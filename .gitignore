@@ -21,3 +21,4 @@ vendor/github.com/gorilla/sessions/doc.go
 vendor/github.com/gorilla/sessions/lex.go
 vendor/github.com/gorilla/sessions/sessions.go
 vendor/github.com/gorilla/sessions/store.go
+redis\.conf

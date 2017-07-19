@@ -9,22 +9,25 @@ import (
 )
 
 var rediskey = ""
+var hostname = ""
 
 func initRadix(){
-	rediskey = getRedisKey()
+	rediskey, hostname = getRedisKey()
 }
 
-func getRedisKey() string{
+func getRedisData() (string,string){
 	fn , err := os.Open("rediskey")
 	if(err != nil){return ""}
 	
 	scan := bufio.NewScanner(fn)
 	scan.Scan()
-	return scan.Text()
+	key := scan.Text()
+	scan.Scan()
+	return key, scan.Text()
 }
 
-func connect(url string, port int){
-	p, err := pool.New("tcp", url+":"+strconv.Itoa(port), 10)
+func connect(){
+	p, err := pool.New("tcp", hostname, 10)
 	if(err != nil){
 		fmt.Println(err.Error())
 		return

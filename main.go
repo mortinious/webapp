@@ -43,7 +43,7 @@ func main(){
 	rand.Seed(rand.Int63())
 	
 	//Test redis connection
-	connect("mortinet.se",6379)
+	connect()
 	
 	
 	
