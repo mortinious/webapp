@@ -36,13 +36,9 @@ func main(){
 	//Sets port number and runs init()
 	port := 7001
 	initVars()
-	initRadix()
 
 	//Creates new seed based on prevoius seed
 	rand.Seed(rand.Int63())
-	
-	//Test redis connection
-//	connect("mortinet.se",6379) //Removed Radix for testing purpose
 	
 	
 	//Registers handlers for GET and POST requests
