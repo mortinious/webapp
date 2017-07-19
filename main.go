@@ -19,22 +19,15 @@ func initVars(){
 	dockerid = getDockerID()
 }
 
-//Handles requests from root ("/")
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	sid := initSession(w,r)
-	num++
-	fmt.Fprintf(w , "This is a Go webserver! \nThis webpage has been loaded "+strconv.Itoa(num)+" times.\nServer running on: "+dockerid+"\nSession ID: "+strconv.Itoa(sid))
-}
 
-//Handles requests for favicon.ico to take these requests away from root
-func handleIcon(w http.ResponseWriter, r *http.Request) {
-	//Code for favicon goes here!
-}
 
 //Main function
 func main(){
 	//Sets port number and runs init()
+	fmt.Println("Starting server...")
 	port := 7001
+	
+	//Init global vars
 	initVars()
 
 	//Creates new seed based on prevoius seed
@@ -44,6 +37,7 @@ func main(){
 	//Registers handlers for GET and POST requests
 	http.HandleFunc("/favicon.ico", handleIcon)
 	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/login", handleLogin)
 	
 	//Prints start message
 	fmt.Println("Server Started on port:"+strconv.Itoa(port))
