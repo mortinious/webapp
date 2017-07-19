@@ -12,18 +12,18 @@ var rediskey = ""
 var hostname = ""
 
 func initRadix(){
-	rediskey, hostname = getRedisKey()
+	rediskey, hostname = getRedisConf()
 }
 
-func getRedisData() (string,string){
-	fn , err := os.Open("rediskey")
+func getRedisConf() (string,string){
+	fn , err := os.Open("redis.conf")
 	if(err != nil){return ""}
 	
 	scan := bufio.NewScanner(fn)
 	scan.Scan()
 	key := scan.Text()
 	scan.Scan()
-	return key, scan.Text()
+	return scan.Text(), key 
 }
 
 func connect(){
