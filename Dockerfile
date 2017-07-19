@@ -30,4 +30,4 @@ RUN cd $GOPATH/src/webapp && godep save
 ENTRYPOINT /go/bin/webapp
 
 # Document that the service listens on port 8080.
-EXPOSE 8080
+EXPOSE 7001
