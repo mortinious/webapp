@@ -34,6 +34,7 @@ func handleIcon(w http.ResponseWriter, r *http.Request) {
 //Main function
 func main(){
 	//Sets port number and runs init()
+	fmt.Println("Starting server...")
 	port := 7001
 	initVars()
 	initRadix()
@@ -43,6 +44,7 @@ func main(){
 	
 	//Test redis connection
 	connect("mortinet.se",6379)
+	
 	
 	
 	//Registers handlers for GET and POST requests
