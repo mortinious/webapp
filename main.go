@@ -42,7 +42,7 @@ func main(){
 	rand.Seed(rand.Int63())
 	
 	//Test redis connection
-	connect("mortinet.se",6379)
+//	connect("mortinet.se",6379) //Removed Radix for testing purpose
 	
 	
 	//Registers handlers for GET and POST requests
