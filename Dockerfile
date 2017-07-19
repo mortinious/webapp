@@ -15,15 +15,12 @@ ADD . /go/src/webapp
 
 
 # Build the app command inside the container.
-#RUN godep save
+RUN godep go build webapp
 #RUN go install webapp
 
-# Run the app command by default when the container starts.
-WORKDIR $GOPATH/src/webapp
-#ENTRYPOINT /go/bin/webapp
 
-RUN go build -o webapp . 
-CMD ["/go/src/app/webapp"]
+# Run the app command by default when the container starts.
+ENTRYPOINT /go/bin/webapp
 
 # Document that the service listens on port 8080.
 EXPOSE 8080
