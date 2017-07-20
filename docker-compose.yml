@@ -1,0 +1,24 @@
+version: '2'
+services:
+  webapp:
+    image: mortinious/webapp:dev
+    container_name: webapp
+    restart: always
+    ports:
+      - 8081:7001
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=webapp
+      - MYSQL_PASSWORD=password
+  mysqldb:
+    image: mariadb:10.3
+    container_name: mysqldb
+    restart: always
+    volumes:
+      - ./datadir:/var/lib/mysql
+      - ./datadir/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    depends_on:
+      - webapp
+      
+      
+# docker run --name some-mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=password -e MYSQL_USER=webapp -e MYSQL_PASSWORD=password -d mariadb:10.3 --character-set-server=utf8 --collation-server=utf8_unicode_ci
