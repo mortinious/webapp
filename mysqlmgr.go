@@ -58,7 +58,7 @@ func mysqlConnection() string{
 	args := s.Text()
 	
 	//Return string compiled from vars
-	return user+":"+pass+"@"+addr+"/"+tabl+"?"+args
+	return user+":"+pass+"@tcp("+addr+")/"+tabl+"?"+args
 }
 
 //prints error to console if error exists

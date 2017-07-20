@@ -43,6 +43,7 @@ func main(){
 	http.HandleFunc("/", handleRoot)
 	http.HandleFunc("/login", handleLogin)
 	http.HandleFunc("/logout", handleLogout)
+	http.HandleFunc("/reg", handleRegister)
 	
 	//Prints start message
 	fmt.Println("Server Started on port:"+strconv.Itoa(port))
