@@ -18,15 +18,13 @@ RUN go get github.com/tools/godep
 
 
 # Build the app command inside the container.
-#RUN go get github.com/gorilla/securecookie \
-#	&& go get github.com/gorilla/context \
-#	&& go get github.com/gorilla/sessions
-#RUN cd $GOPATH/src/webapp && godep save && godep go build
-
 RUN cd $GOPATH/src/webapp && godep go build
+RUN mv $GOPATH/src/webapp/webapp $GOPATH/bin/
+
 
 # Run the app command by default when the container starts.
-ENTRYPOINT /go/src/webapp/webapp
+WORKDIR $GOPATH/src/webapp
+ENTRYPOINT /go/bin/webapp
 
 
 # Document that the service listens on port 7001.
