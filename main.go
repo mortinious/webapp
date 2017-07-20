@@ -1,4 +1,7 @@
-//This is dev only
+/*
+This is the main file
+*/
+
 package main
 
 import(
@@ -34,10 +37,6 @@ func main(){
 
 	//Creates new seed based on prevoius seed
 	rand.Seed(rand.Int63())
-	
-	//Test redis connection
-	
-	
 	
 	//Registers handlers for GET and POST requests
 	http.HandleFunc("/favicon.ico", handleIcon)
