@@ -5,11 +5,20 @@ This file manages http requests and html templates
 package main
 
 import(
+	"github.com/gorilla/mux"
 	"net/http"
 	"html/template"
-	"strconv"
 	"fmt"
 )
+
+func routeTrafic(){
+	r := mux.NewRouter()
+	r.HandleFunc("/", handleRoot)
+	r.HandleFunc("/login", handleLogin).Methods("POST")
+	r.HandleFunc("/logout", handleLogout).Methods("POST")
+	r.HandleFunc("/reg", handleRegister).Methods("POST")
+	http.Handle("/", r)
+}
 
 //Handles requests from root ("/")
 func handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -19,8 +28,11 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	//Init messages to be displayed on page
 	messages := make(map[string]string)
 	
+	//TESTING GROUNDS
+	fmt.Println("Header redirection message: "+w.Header().Get("message"))
+	
 	//Checks clients cookie is old session exists
-	isNew := newSession(strconv.Itoa(sid))
+	isNew := newSession(sid)
 	
 	//Reads html-templates into vars
 	head, _ := template.ParseFiles("html/header.html")
@@ -37,7 +49,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}else{//Cookie found and session id loaded
 		
 		//gets username from databse based on sessionid
-		username, success := getUsernameBySessionId(strconv.Itoa(sid))
+		username, success := getUsernameBySessionId(sid)
 		if(success){ //If session was found
 			if(username != ""){ //If user exists
 			
@@ -52,7 +64,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			}else{ //If no user was found from sessionid
 				
 				index, _ = template.ParseFiles("html/login.html")
-				messages["no_user_found"] = ""
+				messages["no_user_found"] = getSessionData(sid, "login_status")
 			}
 		}
 	}
@@ -63,16 +75,15 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	foot.Execute(w, nil)
 	
 	//Sends a string2 of text for debugging
-	fmt.Fprintf(w , "Server running on: "+dockerid+"<br>Session ID: "+strconv.Itoa(sid))
+	fmt.Fprintf(w , "Server running on: "+dockerid+"<br>Session ID: "+sid)
+	
+	messages = make(map[string]string)
 }
 
 //Handles login requests from /login
 func handleLogin(w http.ResponseWriter, r *http.Request) {
-	//Continue only if request method is POST
-	if(r.Method != "POST"){return}
-	
 	//Get session id from cookie
-	sid := strconv.Itoa(initSession(w,r))
+	sid := initSession(w,r)
 	
 	
 	r.ParseForm()
@@ -86,8 +97,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		
 		//Update session-table with new user for corresponding sessionid
 		setUserForSession(sid,user)
+		
+		
 	}else{
 		//TODO: Send failed login message
+		setSessionDataWithDataLife(sid, "login_status", "Incorrect password or username", 1)
 	}
 	
 	//Redirect back to root
@@ -100,7 +114,7 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 	if(r.Method != "POST"){return}
 	
 	//Get session id from cookie
-	sid := strconv.Itoa(initSession(w,r))
+	sid := initSession(w,r)
 	
 	//Load variables from html form from login.html and pass it to vars
 	r.ParseForm()
@@ -123,7 +137,7 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	if(r.Method != "POST"){return}
 	
 	//Get session id from cookie
-	sid := strconv.Itoa(initSession(w,r))
+	sid := initSession(w,r)
 	
 	//Remove user from sessionid in sessions-table
 	setUserForSession(sid,"")

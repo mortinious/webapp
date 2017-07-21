@@ -39,11 +39,7 @@ func main(){
 	rand.Seed(rand.Int63())
 	
 	//Registers handlers for GET and POST requests
-	http.HandleFunc("/favicon.ico", handleIcon)
-	http.HandleFunc("/", handleRoot)
-	http.HandleFunc("/login", handleLogin)
-	http.HandleFunc("/logout", handleLogout)
-	http.HandleFunc("/reg", handleRegister)
+	routeTrafic()
 	
 	//Prints start message
 	fmt.Println("Server Started on port:"+strconv.Itoa(port))

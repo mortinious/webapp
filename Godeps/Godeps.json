@@ -14,6 +14,11 @@
 			"Rev": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
 		},
 		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.4.0-13-gac112f7",
+			"Rev": "ac112f7d75a0714af1bd86ab17749b31f7809640"
+		},
+		{
 			"ImportPath": "github.com/gorilla/securecookie",
 			"Comment": "v1.1-6-ge59506c",
 			"Rev": "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
