@@ -52,15 +52,9 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		username, success := getUsernameBySessionId(sid)
 		if(success){ //If session was found
 			if(username != ""){ //If user exists
-			
-				//Get userinfo from userinfo table. Load into new User struct
-				user, success := getUserByUsername(username)
-				if(success){ //If user was found in userinfo
-				
-					//Sets username and loads mypage.html into index
-					messages["username"] = user.name
-					index, _ = template.ParseFiles("html/mypage.html")
-				}
+				//Sets username and loads mypage.html into index
+				messages["username"] = username
+				index, _ = template.ParseFiles("html/mypage.html")
 			}else{ //If no user was found from sessionid
 				
 				index, _ = template.ParseFiles("html/login.html")
@@ -121,12 +115,17 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 	user := r.Form.Get("user")
 	pass := r.Form.Get("pass")
 	
-	//Write user credentials to sql
-	addUser(user,pass)
+	//Check if user don't exists
+	if(!checkUsername(user)){
 	
-	//Update session db with user
-	setUserForSession(sid,user)
-	
+		//Write user credentials to sql
+		addUser(user,pass)
+		
+		setSessionDataWithDataLife(sid, "login_status", "New user account created.", 1)
+
+	}else{
+		setSessionDataWithDataLife(sid, "login_status", "User already exists. Try another name.", 1)
+	}
 	//Redirect back to root
 	http.Redirect(w, r, "/", 302)
 }

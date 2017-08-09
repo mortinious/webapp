@@ -25,7 +25,9 @@ import (
 	"bufio"
 )
 
-var db = initMySqlConnection() 
+var db = initMySqlConnection()
+
+var prepQ = make(map[string]*sql.Stmt)
 
 //Declares User struct
 type User struct{
@@ -69,7 +71,26 @@ func initMySqlConnection() (*sql.DB){
 		fmt.Println(err.Error())
 		return nil
 	}
+	
 	return db
+}
+
+func prepareQueries(){
+	//Prepare Queries
+	prepareQ("addUser", "INSERT INTO userinfo (username, password) VALUES (?, ?)")
+	prepareQ("newSession", "INSERT INTO sessions (session) VALUES (?)")
+	prepareQ("setUserForSession", "UPDATE sessions SET user=? WHERE session=?")
+	prepareQ("checkUserCred", "SELECT * FROM userinfo WHERE (username=? AND password=?)")
+	prepareQ("getUserBySession", "SELECT user FROM sessions WHERE session=?")
+	prepareQ("checkUsername", "SELECT 1 FROM userinfo WHERE username=?")
+}
+
+func prepareQ(e string, q string){
+	//Prepare statement and add it to map
+	stmt, err := db.Prepare(q)
+	if(err == nil){
+		prepQ[e] = stmt
+	}
 }
 
 //prints error to console if error exists
@@ -86,7 +107,7 @@ func addUser(name string, pass string) bool{
 	db.Begin()
 	
 	//Query db
-	_, err := db.Query("INSERT INTO userinfo (username, password) VALUES ('"+name+"', '"+pass+"')")
+	_, err := prepQ["addUser"].Exec(name, pass)
 	if(err != nil){
 		fmt.Println(err.Error())
 		return false
@@ -101,8 +122,7 @@ func newSession(session string) bool{
 	if(session == ""){return false}
 	
 	//Query db
-	_, err := db.Query("INSERT INTO sessions (session) VALUES ('"+session+"')")
-	check(err)
+	_, err := prepQ["newSession"].Exec(session)
 	if(err == nil){
 		fmt.Println("New session established, id: "+session)
 		return true
@@ -116,7 +136,8 @@ func setUserForSession(session string, username string){
 	if(session == ""){return}
 	
 	//Query db
-	_, err := db.Query("UPDATE sessions SET user='"+username+"' WHERE session='"+session+"'")
+	_, err := prepQ["setUserForSession"].Exec(username, session)
+	fmt.Println("Setting user "+username+" for session "+session)
 	check(err)
 }
 
@@ -127,7 +148,8 @@ func checkUserCredentials(username string, password string) bool{
 	var user, pass string
 	
 	//Query db
-	rows, err := db.Query("SELECT * FROM userinfo WHERE (username='"+username+"' AND password='"+password+"')")
+	rows, err := prepQ["checkUserCred"].Query(username, password)
+	fmt.Println("Checking credentials for "+username+" with password "+password)
 	check(err)
 	
 	//Reads rows if not nil
@@ -150,41 +172,25 @@ func getUsernameBySessionId(session string) (string, bool){
 	var username string
 	
 	//Query db
-	rows, err := db.Query("SELECT user FROM sessions WHERE session='"+session+"'")
-	check(err)
+	row := prepQ["getUserBySession"].QueryRow(session)
 	
-	//Reads rows if not nil
-	if(rows != nil){
-		rows.Next()
-		err = rows.Scan(&username)
-		check(err)
+	err := row.Scan(&username)
+	if(err == nil){
 		fmt.Println("-- Got: "+username)
-		rows.Close()
 		return username, true
 	}
 	return "", false
 }
 
-//Gets user-object from userinfo
-func getUserByUsername(username string) (User, bool){
-	if(username == ""){return User{name: "", pass: ""}, false}
+//Gets username from sessions-table
+func checkUsername(username string) bool{
+	if(username == ""){return false}
 	
-	var user, pass string
+	var exists bool
 	
 	//Query db
-	rows, err := db.Query("SELECT * FROM userinfo WHERE username='"+username+"'")
-	check(err)
-	
-	//Reads rows if not nil
-	if(rows != nil){
-		for rows.Next(){
-			err = rows.Scan(&user, &pass)
-			if(user == username){
-				//Initiates and returns new User-struct with username and password
-				return User{name: user, pass: pass}, true
-			}
-		}
-	}
-	//Returnf empty User and false
-	return User{name: "", pass: ""}, false
+	err := prepQ["checkUsername"].QueryRow(username).Scan(&exists)
+
+	return err != sql.ErrNoRows
 }
+

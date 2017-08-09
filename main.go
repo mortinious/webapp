@@ -41,6 +41,9 @@ func main(){
 	//Registers handlers for GET and POST requests
 	routeTrafic()
 	
+	//Prepare statements
+	prepareQueries()
+	
 	//Prints start message
 	fmt.Println("Server Started on port:"+strconv.Itoa(port))
 	
