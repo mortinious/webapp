@@ -25,6 +25,8 @@ import (
 	"bufio"
 )
 
+var db = initMySqlConnection() 
+
 //Declares User struct
 type User struct{
 	name string
@@ -33,13 +35,16 @@ type User struct{
 
 //Get mysql connection args from mysql.conf
 //TODO: Update config file to be more user friednly and error proof
-func mysqlConnection() string{
+func initMySqlConnection() (*sql.DB){
+	
+	connection := "webapp:password@/webapp?charset=utf8"
+	
 	//Load file
 	file, err := os.Open("conf/mysql.conf")
 	if(err != nil){
 		//Return default if no file was found
 		fmt.Println("MySQL file not found")
-		return "webapp:password@/webapp?charset=utf8"
+		return nil
 	}
 	
 	//Creates new scanner
@@ -58,7 +63,13 @@ func mysqlConnection() string{
 	args := s.Text()
 	
 	//Return string compiled from vars
-	return user+":"+pass+"@tcp("+addr+")/"+tabl+"?"+args
+	connection = (user+":"+pass+"@tcp("+addr+")/"+tabl+"?"+args)
+	db, err := sql.Open("mysql", connection)
+	if(err != nil){
+		fmt.Println(err.Error())
+		return nil
+	}
+	return db
 }
 
 //prints error to console if error exists
@@ -72,15 +83,10 @@ func check(e error){
 func addUser(name string, pass string) bool{
 	if(name == "" || pass == ""){return false}
 	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
+	db.Begin()
 	
 	//Query db
-	_, err = db.Query("INSERT INTO userinfo (username, password) VALUES ('"+name+"', '"+pass+"')")
+	_, err := db.Query("INSERT INTO userinfo (username, password) VALUES ('"+name+"', '"+pass+"')")
 	if(err != nil){
 		fmt.Println(err.Error())
 		return false
@@ -94,15 +100,8 @@ func addUser(name string, pass string) bool{
 func newSession(session string) bool{
 	if(session == ""){return false}
 	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
-	
 	//Query db
-	_, err = db.Query("INSERT INTO sessions (session) VALUES ('"+session+"')")
+	_, err := db.Query("INSERT INTO sessions (session) VALUES ('"+session+"')")
 	check(err)
 	if(err == nil){
 		fmt.Println("New session established, id: "+session)
@@ -116,15 +115,8 @@ func newSession(session string) bool{
 func setUserForSession(session string, username string){
 	if(session == ""){return}
 	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
-	
 	//Query db
-	_, err = db.Query("UPDATE sessions SET user='"+username+"' WHERE session='"+session+"'")
+	_, err := db.Query("UPDATE sessions SET user='"+username+"' WHERE session='"+session+"'")
 	check(err)
 }
 
@@ -133,13 +125,6 @@ func checkUserCredentials(username string, password string) bool{
 	
 	//declares vars
 	var user, pass string
-	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
 	
 	//Query db
 	rows, err := db.Query("SELECT * FROM userinfo WHERE (username='"+username+"' AND password='"+password+"')")
@@ -164,13 +149,6 @@ func getUsernameBySessionId(session string) (string, bool){
 	//Declare vars
 	var username string
 	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
-	
 	//Query db
 	rows, err := db.Query("SELECT user FROM sessions WHERE session='"+session+"'")
 	check(err)
@@ -192,13 +170,6 @@ func getUserByUsername(username string) (User, bool){
 	if(username == ""){return User{name: "", pass: ""}, false}
 	
 	var user, pass string
-	
-	//Open mysql connection with connection args
-	db, err := sql.Open("mysql", mysqlConnection())
-	check(err)
-	
-	//Defer closing until function is returned, (GO best practice)
-	defer db.Close()
 	
 	//Query db
 	rows, err := db.Query("SELECT * FROM userinfo WHERE username='"+username+"'")
