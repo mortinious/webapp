@@ -80,7 +80,7 @@ func prepareQueries(){
 	prepareQ("addUser", "INSERT INTO userinfo (username, password) VALUES (?, ?)")
 	prepareQ("newSession", "INSERT INTO sessions (session) VALUES (?)")
 	prepareQ("setUserForSession", "UPDATE sessions SET user=? WHERE session=?")
-	prepareQ("checkUserCred", "SELECT * FROM userinfo WHERE (username=? AND password=?)")
+	prepareQ("checkUserCred", "SELECT 1 FROM userinfo WHERE (username=? AND password=?)")
 	prepareQ("getUserBySession", "SELECT user FROM sessions WHERE session=?")
 	prepareQ("checkUsername", "SELECT 1 FROM userinfo WHERE username=?")
 }
@@ -144,22 +144,14 @@ func setUserForSession(session string, username string){
 func checkUserCredentials(username string, password string) bool{
 	if(username == "" || password == ""){return false}
 	
-	//declares vars
-	var user, pass string
+	var exists bool
 	
 	//Query db
-	rows, err := prepQ["checkUserCred"].Query(username, password)
-	fmt.Println("Checking credentials for "+username+" with password "+password)
-	check(err)
+	err := prepQ["checkUserCred"].QueryRow(username, password).Scan(&exists)
 	
 	//Reads rows if not nil
-	if(rows != nil){
-		for rows.Next(){
-			err = rows.Scan(&user, &pass)
-			if(user == username && pass == password){
-				return true
-			}
-		}
+	if(err == nil){
+		return true
 	}
 	return false
 }
